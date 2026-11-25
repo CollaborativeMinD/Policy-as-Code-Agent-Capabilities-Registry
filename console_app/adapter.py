@@ -33,7 +33,7 @@ def rpc(binding, method, params):
         headers["Mcp-Name"] = params["name"]
     meta = {"io.modelcontextprotocol/protocolVersion": version, "io.modelcontextprotocol/clientCapabilities": {}}
     message = {"jsonrpc":"2.0", "id":1, "method":method, "params":dict(params, _meta=meta)}
-    with closing(HTTPConnection("127.0.0.1", cfg["port"], timeout=5)) as conn:
+    with closing(HTTPConnection("127.0.0.1", cfg["port"], timeout=binding["runtime"].read_seconds)) as conn:
         conn.request("POST", "/mcp", json.dumps(message), headers)
         response = conn.getresponse()
         if response.status != 200:

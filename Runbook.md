@@ -63,3 +63,5 @@ Start with [policy.example.toml](policy.example.toml) for this component and [co
 4. Qualify the exact commit on local Forgejo. Review the package, image, security scan and receipt for each release target. Ship the reviewed artifacts and record their digests.
 
 The version 2 `[runtime]` table in `console.toml` sets request size, concurrency and client deadlines. Version 1 files inherit the shipped budget. Reissue them as version 2 to pin these choices in the admitted document.
+
+Set registry contention time in `ledger_wait_seconds` in [policy.example.toml](policy.example.toml). The registry validates the value with the grant declaration before opening its ledger.

@@ -49,7 +49,7 @@ class CapabilityRegistry:
     @contextmanager
     def tx(self, *, create=False):
         uri = self.path.resolve().as_uri() + ("?mode=rwc" if create else "?mode=rw")
-        with closing(sqlite3.connect(uri, uri=True, timeout=2)) as db, db:
+        with closing(sqlite3.connect(uri, uri=True, timeout=self.policy.ledger_wait_seconds)) as db, db:
             db.execute("PRAGMA trusted_schema = OFF")
             db.execute("PRAGMA synchronous = FULL")
             db.execute("BEGIN IMMEDIATE")

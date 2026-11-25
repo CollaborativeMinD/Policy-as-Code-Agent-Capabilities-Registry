@@ -1,4 +1,5 @@
 version = 1
+ledger_wait_seconds = 2
 policy_id = "hmt-zero-trust"
 generation = 2
 instructions = "Use retrieved support evidence when available. Keep responses concise and avoid unsupported assumptions."

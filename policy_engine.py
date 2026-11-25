@@ -70,6 +70,7 @@ class Rule(Contract):
 
 
 class Declaration(Contract):
+    ledger_wait_seconds: Annotated[int, Field(ge=1, le=120)]
     version: Annotated[int, Field(ge=1, le=1)]
     policy_id: Id
     generation: Annotated[int, Field(ge=1, le=2**63 - 1)]
@@ -94,7 +95,13 @@ class PolicyEngine:
         self.sha256 = digest(raw)
         require(re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is not None
                 and compare_digest(self.sha256, expected_sha256), "POLICY_PIN_MISMATCH")
-        self._policy = Declaration.model_validate(tomllib.loads(raw.decode("utf-8")))
+        document = tomllib.loads(raw.decode("utf-8"))
+        if "ledger_wait_seconds" not in document:
+            from registry_assets import asset
+            defaults = tomllib.loads(asset("policy.example.toml").read_text(encoding="utf8"))
+            document["ledger_wait_seconds"] = defaults["ledger_wait_seconds"]
+        self._policy = Declaration.model_validate(document)
+        self.ledger_wait_seconds = self._policy.ledger_wait_seconds
         self.generation = self._policy.generation
         self.instructions = self._policy.instructions
         self.policy_id = self._policy.policy_id
