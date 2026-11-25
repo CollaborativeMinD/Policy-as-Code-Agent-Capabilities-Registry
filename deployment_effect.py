@@ -53,7 +53,24 @@ def exercise(call, policy_hash):
             "Removal did not block the cached call")
     reenable, = call("admin", [change("enable", 3)])
     require(reenable["structuredContent"]["reason"] == "CAPABILITY_REMOVED", "Tombstone did not persist")
-    return {"activated_policy_sha256": policy_hash, "enable": enabled["structuredContent"],
+    kb = {}
+    for name, method, arguments, expected in (
+        ("kb.search", "tools/call", {"name": "kb.search", "arguments": {"query": "rate limit"}}, "api-rate-limit"),
+        ("kb.catalog", "resources/read", {"uri": "kb://articles"}, "python-env"),
+        ("kb.draft", "prompts/get", {"name": "draft_support_reply", "arguments": {"customer_message": "Help"}},
+         "Do not invent product policy"),
+    ):
+        transition = {"tool": name, "action": "enable", "expected_generation": 0}
+        enabled_kb, = call("admin", [tool("capabilities.transition", transition)])
+        require(enabled_kb["structuredContent"]["mode"] == "on", "KB enable failed")
+        value, = call("operator", [{"method": method, "params": arguments}])
+        require(expected in json.dumps(value), "KB effect differs")
+        receipt = value["structuredContent"] if method == "tools/call" else value["_meta"]
+        call("admin", [tool("capabilities.transition", transition | {"action": "disable", "expected_generation": 1})])
+        blocked, = call("operator", [tool(name, arguments.get("arguments", {}))])
+        require(blocked["structuredContent"]["status"] == "DENY", "Disabled KB effect escaped admission")
+        kb[name] = {"allowed": "PASS", "receipt_sha256": receipt["receipt_sha256"], "after_disable": "DENY"}
+    return {"kb": kb, "activated_policy_sha256": policy_hash, "enable": enabled["structuredContent"],
             "invocation": result["structuredContent"], "disable": disabled["structuredContent"],
             "remove": removed["structuredContent"], "reinvoke": denied["structuredContent"]}
 

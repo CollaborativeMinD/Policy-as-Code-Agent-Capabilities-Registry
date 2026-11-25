@@ -79,7 +79,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(400, response)
         try:
             registry.check(session)
-            baseline = Baseline(registry.policy, session, self.server.baseline_config)
+            config = self.server.baseline_config if registry.policy.baseline_config_pin(session) else None
+            baseline = Baseline(registry.policy, session, config)
             response = Server(registry, session, baseline, stateless=True).handle(message)
         except (ValueError, OSError, sqlite3.Error):
             return self.reply(403, error(identifier, -32000, "ADMISSION_UNAVAILABLE"))
