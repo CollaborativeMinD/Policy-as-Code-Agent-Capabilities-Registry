@@ -1,6 +1,12 @@
 # syntax=docker/dockerfile:1
 ARG PYTHON_IMAGE
-FROM ${PYTHON_IMAGE} AS build
+FROM ${PYTHON_IMAGE} AS interpreter
+ARG PYTHON_APK
+RUN if [ -n "$PYTHON_APK" ]; then apk add --no-cache "python-3.13=$PYTHON_APK" libstdc++; fi
+
+FROM interpreter AS build
+RUN python -m venv /build-tools
+ENV PATH="/build-tools/bin:$PATH"
 WORKDIR /src
 COPY . .
 RUN python -m pip install --no-cache-dir -r requirements-build.lock \
@@ -17,17 +23,14 @@ RUN --mount=type=secret,id=sovereign,target=/tmp/hmt_mcp_plus_server_kernel-1.0.
     fi
 RUN /opt/venv/bin/python -m pip check
 
-FROM ${PYTHON_IMAGE} AS runtime
+FROM interpreter AS runtime
 ARG SERVICE_UID
 ARG SERVICE_GID
 ARG REVISION
 LABEL org.opencontainers.image.revision="$REVISION"
 ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 COPY --from=build /opt/venv /opt/venv
-RUN groupadd --gid "$SERVICE_GID" runtime \
-    && useradd --uid "$SERVICE_UID" --gid "$SERVICE_GID" --no-create-home --shell /usr/sbin/nologin runtime \
-    && install -d -m 0700 -o runtime -g runtime /state \
-    && touch /state/.volume-initialized
+RUN mkdir -p /state && touch /state/.volume-initialized && chmod 0700 /state && chown -R "$SERVICE_UID:$SERVICE_GID" /state
 WORKDIR /state
-USER runtime:runtime
+USER ${SERVICE_UID}:${SERVICE_GID}
 ENTRYPOINT ["hmt-capability-server"]

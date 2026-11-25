@@ -1,0 +1,4 @@
+textual==8.2.8
+mcp==2.3.0
+uvicorn==0.54.0
+pydantic==2.13.4
