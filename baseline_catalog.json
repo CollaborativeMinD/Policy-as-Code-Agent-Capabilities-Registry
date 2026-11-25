@@ -1,0 +1,1062 @@
+{
+  "baseline_id": "HMT-MCP-BASELINE/1.2.0",
+  "core_contract_sha256": "sha256:01be0d462ae7dfb267d53e01651ad26889fc30f5b9bf03d7ce6b550e82942482",
+  "git_contract_sha256": "sha256:8ad9d46edc88d1fc31deb74b4c11adcf12085202e19141ff479d6c0e028455ba",
+  "schema_id": "urn:hmt:mcp-plus:composite-tool-catalog:1.0.0",
+  "tools": [
+    {
+      "description": "List admitted files within the bounded repository root.",
+      "effect": "observe",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "directory": {
+            "default": ".",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          }
+        },
+        "required": [
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "list_files",
+      "ordinal": 1,
+      "schema_hash": "sha256:a285b3af59a883e6e46aa375c66dc1cb287fd25012f44bca66e929b5884afb82"
+    },
+    {
+      "description": "Read an admitted text file from the bounded repository root.",
+      "effect": "observe",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          },
+          "path": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "read_file",
+      "ordinal": 2,
+      "schema_hash": "sha256:2814a89b71528a820d12931ccc5693b726378ed11f08a0f1e31e296bf84815e2"
+    },
+    {
+      "description": "Create or update an admitted file within the bounded repository root.",
+      "effect": "mutate",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 262144,
+            "type": "string"
+          },
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          },
+          "path": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "content",
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "write_file",
+      "ordinal": 3,
+      "schema_hash": "sha256:133fdecb0047bcfddbb9ec3f36047d3ce9db27b30e37baa57f825d5aaf8e1e4f"
+    },
+    {
+      "description": "Execute an admitted deterministic named command profile without a shell.",
+      "effect": "execute",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "command": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          }
+        },
+        "required": [
+          "command",
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "run_command",
+      "ordinal": 4,
+      "schema_hash": "sha256:50dc9506624e55d30317164823eddee5c2a2616d80c8bed32ab9667740c362a3"
+    },
+    {
+      "description": "Return authoritative task-board cards and lifecycle states.",
+      "effect": "observe",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "name": "tasks_list",
+      "ordinal": 5,
+      "schema_hash": "sha256:cd1a463c46d6264134447db17a8c3c7abe5b9a2488c6d759fea66da1f96b133e"
+    },
+    {
+      "description": "Claim one admitted unstarted task for the assigned agent.",
+      "effect": "mutate",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          },
+          "task_id": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "task_id",
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "task_get",
+      "ordinal": 6,
+      "schema_hash": "sha256:356a54c91b710d684b2b31e079986649659f3519e303df99218d1c63b88d4ffa"
+    },
+    {
+      "description": "Submit progress through the coupled firewall, including complete bounded package tests and corrective feedback.",
+      "effect": "mutate",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          },
+          "package_path": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "progress": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "task_id": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "task_id",
+          "progress",
+          "package_path",
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "task_update",
+      "ordinal": 7,
+      "schema_hash": "sha256:87b6e154f553be22c28a22cdd23fcf8d1d1ca369be00c579fa52b3ea302a5078"
+    },
+    {
+      "description": "Create an admitted follow-up or repair task without granting execution authority.",
+      "effect": "mutate",
+      "inputSchema": {
+        "$defs": {
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 128,
+            "minLength": 8,
+            "type": "string"
+          },
+          "mission_packet": {
+            "$ref": "#/$defs/MissionPacket"
+          },
+          "parent_task_id": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason_code": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "idempotency_key",
+          "mission_packet"
+        ],
+        "type": "object"
+      },
+      "name": "task_create",
+      "ordinal": 8,
+      "schema_hash": "sha256:87e3b615aa3be02b1073026c804349189fc62e85591d70da75afdc2a7ea306b4"
+    },
+    {
+      "description": "Return the next deterministic lawful action, requiring a current passing test receipt before review.",
+      "effect": "observe",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "name": "working_agreement",
+      "ordinal": 9,
+      "schema_hash": "sha256:cd1a463c46d6264134447db17a8c3c7abe5b9a2488c6d759fea66da1f96b133e"
+    },
+    {
+      "description": "Detect task lifecycle contradictions and completion-policy breaches.",
+      "effect": "observe",
+      "inputSchema": {
+        "additionalProperties": false,
+        "type": "object"
+      },
+      "name": "verify_task_board",
+      "ordinal": 10,
+      "schema_hash": "sha256:cd1a463c46d6264134447db17a8c3c7abe5b9a2488c6d759fea66da1f96b133e"
+    },
+    {
+      "description": "Return capabilities visible to a registered agent in its authoritative state.",
+      "effect": "observe",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agent_id"
+        ],
+        "type": "object"
+      },
+      "name": "list_skills",
+      "ordinal": 11,
+      "schema_hash": "sha256:6d7a4243f186e2a65cefdc01c457594cc22bfb2cb1f17696e69de183ecaa09a3"
+    },
+    {
+      "description": "Retrieve task-scoped GraphRAG evidence for a registered agent.",
+      "effect": "observe",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_id": {
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "type": "string"
+          },
+          "query": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "top_k": {
+            "default": 5,
+            "maximum": 10,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agent_id",
+          "query"
+        ],
+        "type": "object"
+      },
+      "name": "memory_search",
+      "ordinal": 12,
+      "schema_hash": "sha256:64950ff4ded1e3fc5e860bdff660dac0da2245cc3a79f77adae0bc510cddc9ce"
+    },
+    {
+      "description": "Execute one schema-selected, policy-governed Git-lane operation inside the exact admitted repository root.",
+      "effect": "execute",
+      "inputSchema": {
+        "$defs": {
+          "BranchInput": {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "enum": [
+                  "validate",
+                  "create",
+                  "switch",
+                  "delete",
+                  "merge",
+                  "rebase",
+                  "sync"
+                ],
+                "title": "Action",
+                "type": "string"
+              },
+              "allow_history_rewrite": {
+                "default": false,
+                "title": "Allow History Rewrite",
+                "type": "boolean"
+              },
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "maxLength": 256,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Name"
+              },
+              "no_ff": {
+                "default": false,
+                "title": "No Ff",
+                "type": "boolean"
+              },
+              "operation": {
+                "const": "branch",
+                "title": "Operation",
+                "type": "string"
+              },
+              "remote": {
+                "default": "origin",
+                "pattern": "^[A-Za-z0-9._-]{1,64}$",
+                "title": "Remote",
+                "type": "string"
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "maxLength": 256,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Source"
+              },
+              "target": {
+                "anyOf": [
+                  {
+                    "maxLength": 256,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Target"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation",
+              "action"
+            ],
+            "title": "BranchInput",
+            "type": "object"
+          },
+          "ChangelogInput": {
+            "additionalProperties": false,
+            "properties": {
+              "breaking_tag": {
+                "default": "BREAKING CHANGE",
+                "maxLength": 64,
+                "minLength": 1,
+                "title": "Breaking Tag",
+                "type": "string"
+              },
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "exclude_scopes": {
+                "items": {
+                  "maxLength": 48,
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9._-]+$",
+                  "type": "string"
+                },
+                "maxItems": 32,
+                "title": "Exclude Scopes",
+                "type": "array"
+              },
+              "group_order": {
+                "items": {
+                  "enum": [
+                    "feat",
+                    "fix",
+                    "perf",
+                    "refactor",
+                    "docs",
+                    "test",
+                    "build",
+                    "ci",
+                    "chore",
+                    "revert"
+                  ],
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "title": "Group Order",
+                "type": "array"
+              },
+              "include_scopes": {
+                "items": {
+                  "maxLength": 48,
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9._-]+$",
+                  "type": "string"
+                },
+                "maxItems": 32,
+                "title": "Include Scopes",
+                "type": "array"
+              },
+              "link_pattern": {
+                "anyOf": [
+                  {
+                    "maxLength": 512,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Link Pattern"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "operation": {
+                "const": "changelog",
+                "title": "Operation",
+                "type": "string"
+              },
+              "revision_range": {
+                "maxLength": 512,
+                "minLength": 3,
+                "title": "Revision Range",
+                "type": "string"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation",
+              "revision_range"
+            ],
+            "title": "ChangelogInput",
+            "type": "object"
+          },
+          "CleanCheckInput": {
+            "additionalProperties": false,
+            "properties": {
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "operation": {
+                "const": "clean_check",
+                "title": "Operation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation"
+            ],
+            "title": "CleanCheckInput",
+            "type": "object"
+          },
+          "CommitInput": {
+            "additionalProperties": false,
+            "properties": {
+              "allow_empty": {
+                "default": false,
+                "title": "Allow Empty",
+                "type": "boolean"
+              },
+              "body": {
+                "anyOf": [
+                  {
+                    "maxLength": 8192,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Body"
+              },
+              "commit_type": {
+                "enum": [
+                  "feat",
+                  "fix",
+                  "docs",
+                  "style",
+                  "refactor",
+                  "perf",
+                  "test",
+                  "build",
+                  "ci",
+                  "chore",
+                  "revert"
+                ],
+                "title": "Commit Type",
+                "type": "string"
+              },
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "enforce_lint": {
+                "default": true,
+                "title": "Enforce Lint",
+                "type": "boolean"
+              },
+              "footer": {
+                "anyOf": [
+                  {
+                    "maxLength": 4096,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Footer"
+              },
+              "max_subject": {
+                "default": 72,
+                "maximum": 100,
+                "minimum": 10,
+                "title": "Max Subject",
+                "type": "integer"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "operation": {
+                "const": "commit",
+                "title": "Operation",
+                "type": "string"
+              },
+              "scope": {
+                "anyOf": [
+                  {
+                    "pattern": "^[a-z0-9._-]{1,48}$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Scope"
+              },
+              "subject": {
+                "maxLength": 200,
+                "minLength": 1,
+                "title": "Subject",
+                "type": "string"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation",
+              "commit_type",
+              "subject"
+            ],
+            "title": "CommitInput",
+            "type": "object"
+          },
+          "DiffInput": {
+            "additionalProperties": false,
+            "properties": {
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "max_bytes": {
+                "default": 500000,
+                "maximum": 1000000,
+                "minimum": 1024,
+                "title": "Max Bytes",
+                "type": "integer"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "operation": {
+                "enum": [
+                  "staged_diff",
+                  "working_diff"
+                ],
+                "title": "Operation",
+                "type": "string"
+              },
+              "paths": {
+                "items": {
+                  "maxLength": 512,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 64,
+                "title": "Paths",
+                "type": "array"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation"
+            ],
+            "title": "DiffInput",
+            "type": "object"
+          },
+          "MissionPacket": {
+            "additionalProperties": false,
+            "properties": {
+              "agent_authority_id": {
+                "maxLength": 128,
+                "minLength": 3,
+                "title": "Agent Authority Id",
+                "type": "string"
+              },
+              "decomposed_task_id": {
+                "minimum": 0,
+                "title": "Decomposed Task Id",
+                "type": "integer"
+              },
+              "tasked_agent_id": {
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "title": "Tasked Agent Id",
+                "type": "string"
+              }
+            },
+            "required": [
+              "decomposed_task_id",
+              "tasked_agent_id",
+              "agent_authority_id"
+            ],
+            "title": "MissionPacket",
+            "type": "object"
+          },
+          "PullRequestInput": {
+            "additionalProperties": false,
+            "properties": {
+              "base": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Base",
+                "type": "string"
+              },
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "head": {
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Head",
+                "type": "string"
+              },
+              "include_stats": {
+                "default": true,
+                "title": "Include Stats",
+                "type": "boolean"
+              },
+              "max_bullets": {
+                "default": 12,
+                "maximum": 50,
+                "minimum": 1,
+                "title": "Max Bullets",
+                "type": "integer"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "operation": {
+                "const": "pr_description",
+                "title": "Operation",
+                "type": "string"
+              },
+              "sections": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 12,
+                "title": "Sections",
+                "type": "array"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation",
+              "base",
+              "head"
+            ],
+            "title": "PullRequestInput",
+            "type": "object"
+          },
+          "RepoContextInput": {
+            "additionalProperties": false,
+            "properties": {
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "operation": {
+                "const": "repo_context",
+                "title": "Operation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation"
+            ],
+            "title": "RepoContextInput",
+            "type": "object"
+          },
+          "TagInput": {
+            "additionalProperties": false,
+            "properties": {
+              "action": {
+                "enum": [
+                  "list",
+                  "create",
+                  "annotate"
+                ],
+                "title": "Action",
+                "type": "string"
+              },
+              "dry_run": {
+                "default": true,
+                "title": "Dry Run",
+                "type": "boolean"
+              },
+              "message": {
+                "anyOf": [
+                  {
+                    "maxLength": 4096,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Message"
+              },
+              "mission_packet": {
+                "$ref": "#/$defs/MissionPacket"
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "maxLength": 256,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Name"
+              },
+              "operation": {
+                "const": "tag",
+                "title": "Operation",
+                "type": "string"
+              },
+              "target": {
+                "default": "HEAD",
+                "maxLength": 256,
+                "minLength": 1,
+                "title": "Target",
+                "type": "string"
+              }
+            },
+            "required": [
+              "mission_packet",
+              "operation",
+              "action"
+            ],
+            "title": "TagInput",
+            "type": "object"
+          }
+        },
+        "discriminator": {
+          "mapping": {
+            "branch": "#/$defs/BranchInput",
+            "changelog": "#/$defs/ChangelogInput",
+            "clean_check": "#/$defs/CleanCheckInput",
+            "commit": "#/$defs/CommitInput",
+            "pr_description": "#/$defs/PullRequestInput",
+            "repo_context": "#/$defs/RepoContextInput",
+            "staged_diff": "#/$defs/DiffInput",
+            "tag": "#/$defs/TagInput",
+            "working_diff": "#/$defs/DiffInput"
+          },
+          "propertyName": "operation"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/RepoContextInput"
+          },
+          {
+            "$ref": "#/$defs/CleanCheckInput"
+          },
+          {
+            "$ref": "#/$defs/DiffInput"
+          },
+          {
+            "$ref": "#/$defs/CommitInput"
+          },
+          {
+            "$ref": "#/$defs/PullRequestInput"
+          },
+          {
+            "$ref": "#/$defs/ChangelogInput"
+          },
+          {
+            "$ref": "#/$defs/BranchInput"
+          },
+          {
+            "$ref": "#/$defs/TagInput"
+          }
+        ]
+      },
+      "name": "git_lane",
+      "ordinal": 13,
+      "schema_hash": "sha256:78037a13124cd7bb8ee0adddfdc5d000b3d28af59e9a6dbfb9dd7fd07f6d5965"
+    }
+  ]
+}

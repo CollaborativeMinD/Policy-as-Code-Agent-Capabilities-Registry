@@ -1,0 +1,52 @@
+version = 1
+policy_id = "hmt-zero-trust"
+generation = 1
+baseline_catalog_sha256 = "3bcc9f860f6db8c6a6336cb50b282e369adcf95fabda0f923d5fd8fec2f2d653"
+
+[environment]
+zone = "local"
+
+[principals.operator]
+credential_sha256 = "OPERATOR_SHA256"
+expires_at = 1 # bootstrap substitutes a fresh expiry for every demo credential
+roles = ["report_operator"]
+attributes = { tenant = "analysis", suspended = false }
+
+[principals.admin]
+credential_sha256 = "ADMIN_SHA256"
+expires_at = 1
+roles = ["capability_admin"]
+attributes = { tenant = "analysis", change_control = true, suspended = false }
+
+[principals.viewer]
+credential_sha256 = "VIEWER_SHA256"
+expires_at = 1
+roles = ["viewer"]
+attributes = { tenant = "analysis", suspended = false }
+
+[roles]
+report_operator = ["reports.preview:list", "reports.preview:invoke"]
+capability_admin = ["reports.preview:status", "reports.preview:enable",
+                    "reports.preview:disable", "reports.preview:remove"]
+viewer = []
+
+[tools."reports.preview"]
+plugin = "reports-v1"
+contract_sha256 = "ecc43694c71da9686223dd9df050ff66aec38bfd5b396cefe0b762c3e80350cc"
+attributes = { tenant = "analysis" }
+
+[[rules]]
+effect = "allow"
+scopes = ["reports.preview:list", "reports.preview:invoke"]
+match = { "principal.tenant" = "analysis", "resource.tenant" = "analysis", "environment.zone" = "local" }
+
+[[rules]]
+effect = "allow"
+scopes = ["reports.preview:status", "reports.preview:enable", "reports.preview:disable", "reports.preview:remove"]
+match = { "principal.tenant" = "analysis", "principal.change_control" = true, "environment.zone" = "local" }
+
+[[rules]]
+effect = "deny"
+scopes = ["reports.preview:list", "reports.preview:invoke", "reports.preview:status",
+          "reports.preview:enable", "reports.preview:disable", "reports.preview:remove"]
+match = { "principal.suspended" = true }
