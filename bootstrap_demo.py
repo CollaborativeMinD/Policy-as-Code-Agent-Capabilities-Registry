@@ -7,10 +7,11 @@ from secrets import token_urlsafe
 from time import time
 
 from policy_engine import digest
+from registry_assets import asset
 
 
 def render(tokens, expires):
-    policy = Path(__file__).with_name("policy.example.toml").read_text(encoding="utf-8")
+    policy = asset("policy.example.toml").read_text(encoding="utf-8")
     for principal, token in tokens.items():
         policy = policy.replace(f"{principal.upper()}_SHA256", digest(token))
     return policy.replace("expires_at = 1", f"expires_at = {expires}").encode("utf-8")

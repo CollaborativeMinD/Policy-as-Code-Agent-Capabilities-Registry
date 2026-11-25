@@ -5,10 +5,11 @@ import json
 import os
 
 from policy_engine import BASELINE_SHA256, digest, read_bounded, require
+from registry_assets import asset
 
 
 def frozen_catalog():
-    raw = read_bounded(Path(__file__).with_name("baseline_catalog.json"), 262_144)
+    raw = read_bounded(asset("baseline_catalog.json"), 262_144)
     require(digest(raw) == BASELINE_SHA256, "BASELINE_CATALOG_DRIFT")
     return {entry["name"]: entry for entry in json.loads(raw)["tools"]}
 

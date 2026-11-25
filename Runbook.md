@@ -39,7 +39,7 @@ Run the same case again. Then run the denied case. Confirm that denial leaves th
 
 ## 4. Qualify and promote
 
-Push the change through [the qualification workflow](.github/workflows/qualify.yml). Review the exact commit and test results. On POSIX, also run the [sovereign witness](README.md#connect-the-sovereign-baseline) when the baseline bridge changes.
+Push the candidate revision to the workstation Forgejo remote. Wait for Linux and Windows packaging and AMD64 and ARM64 Compose to pass. Match the run to the exact commit. Read back the signed reports and the distributions before publishing the same SHA. [Qualification workflow](.forgejo/workflows/distribution.yml)
 
 Compare the observed effect, lifecycle generation, and receipt with the candidate policy. Record the commit, policy digest, and result. The host operator applies the approved digest with `server.py activate`. Relist tools and recheck the intended effect. Stop when the policy and evidence agree.
 

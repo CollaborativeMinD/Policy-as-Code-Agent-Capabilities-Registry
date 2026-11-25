@@ -9,7 +9,7 @@ A local stdio MCP server with a frozen 13-tool HMT baseline and a separate regis
 3. **Add code only for a missing behavior.** Declare the contract in policy and run it before adding the handler. Use the failure to locate the missing model, binding, or enforcement rule. Build that piece and run the same case again.
 4. **Reconcile and stop.** Compare the effect and receipt with the policy. Verify an allowed case and a denied case. Once both match, leave the rest of the runtime alone.
 
-Push the reviewed change through [qualification](.github/workflows/qualify.yml). A passing run qualifies the commit for promotion. The host operator activates the approved TOML by digest. [Runbook](Runbook.md) · [Agent guide](AGENTS.md) · [Capability policy skill](SKILL.md)
+Push the reviewed revision to the local Forgejo [qualification workflow](.forgejo/workflows/distribution.yml). A passing run qualifies the commit for promotion. The host operator activates the approved TOML by digest. [Runbook](Runbook.md) · [Agent guide](AGENTS.md) · [Capability policy skill](SKILL.md)
 
 ## Run the local demonstration
 
@@ -64,5 +64,22 @@ For a configured baseline, set the applicable principal’s `baseline_config_sha
 ## Qualification scope
 
 Run `python -B -W error -m unittest -v` for registry and stdio tests. The opt-in POSIX test uses the original packaged adapters with a signed test authority and a harmless `list_files` fixture. It checks the exact 13-tool discovery surface and verifies that revoking authority after discovery blocks the next effect. Production authority bindings and remote HTTP transport require separate integration.
+
+## Install a qualified distribution
+
+Forgejo publishes the wheel and sdist after fresh installs on Linux and native Windows. The AMD64 and ARM64 Compose jobs publish image archives and signed receipts. They run stdio calls across separate containers, check the removal tombstone, and run the signed baseline fixture with the pinned sovereign ports. [Deployment policy](deployment.toml)
+
+Install the qualified wheel in a dedicated virtual environment with `requirements.lock`. It provides `hmt-capability-server` and `hmt-capability-bootstrap`. The optional sovereign wheel supplies the POSIX baseline ports.
+
+For Compose, load the image archive with `docker image load -i <archive>`. Use the image tag from its signed `verification.json`. Render the spec with the matching platform.
+
+```powershell
+python deploy_common.py render --platform linux/amd64 --image <qualified-image-tag> --output local-deploy
+$pin = docker compose -f local-deploy/compose.json run --rm -T --entrypoint hmt-capability-bootstrap mcp /state/demo
+docker compose -f local-deploy/compose.json run --rm -T mcp activate --policy /state/demo/policy.toml --policy-sha256 $pin --state /state/demo/state.sqlite
+docker compose -f local-deploy/compose.json run --rm -T mcp serve --policy /state/demo/policy.toml --policy-sha256 $pin --state /state/demo/state.sqlite --principal admin --credential-file /state/demo/admin.token
+```
+
+The service uses stdio and a private state volume. It publishes no port. The qualification image accepts the upstream wheel through a pinned build input. Demo tokens stay in the test volume.
 
 Reference artifacts are the supplied MCP+ server kernel v1.0.0 and the HMT v1.7.15 PolicyEngine and CapabilityRegistry. The bridge retains strict schema checks and sovereign admission from MCP+. The registry follows HMT’s role-and-attribute checks, off-by-default binding, lifecycle generations, and removal after settlement. [MCP tools specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools) · [MCP transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
