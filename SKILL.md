@@ -14,3 +14,7 @@ Read [the runbook](Runbook.md) when you need a command or a denial code.
 5. Qualify the exact commit. Stop when policy, runtime, and evidence agree.
 
 Use `CAPABILITY_NOT_READY` to trace a missing binding or unsettled call. Use `CAPABILITY_DENIED` to trace mode, scope, or attributes. Preserve sovereign baseline admission, deny overrides, separate management scopes, and removal tombstones. Keep activation with the authorized host operator.
+
+## Live operator console
+
+Use the [console guide](Console.md) to observe inventory, publish scoped TOML changes, run admitted tasks and verify their receipts.

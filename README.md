@@ -97,3 +97,7 @@ docker compose -f local-deploy/compose.json run --rm -T mcp serve --policy /stat
 The service uses stdio and a private state volume. It publishes no port. The qualification image accepts the upstream wheel through a pinned build input. Demo tokens stay in the test volume.
 
 Reference artifacts are the supplied MCP+ server kernel v1.0.0 and the HMT v1.7.15 PolicyEngine and CapabilityRegistry. The bridge retains strict schema checks and sovereign admission from MCP+. The registry follows HMT’s role-and-attribute checks, off-by-default binding, lifecycle generations, and removal after settlement. [MCP tools specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools) · [MCP transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports)
+
+## Live operator console
+
+Use the [console guide](Console.md) to observe inventory, publish scoped TOML changes, run admitted tasks and verify their receipts.

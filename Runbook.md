@@ -48,3 +48,7 @@ Compare the observed effect, lifecycle generation, and receipt with the candidat
 Read status before each change. Disable first to stop new calls. Wait for pending calls to settle. Use the current generation to remove the capability. Removal records a tombstone.
 
 An uncertain result leaves a pending lease. Inspect the capability’s external state and the admission receipt before recovery. Keep removal blocked while the outcome is unknown. The service provides no forced-removal operation.
+
+## Live operator console
+
+Use the [console guide](Console.md) to observe inventory, publish scoped TOML changes, run admitted tasks and verify their receipts.
