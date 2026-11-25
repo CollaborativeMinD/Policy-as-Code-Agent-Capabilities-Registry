@@ -6,14 +6,16 @@ import sqlite3
 
 from baseline_bridge import Baseline
 from policy_engine import Denied, wire
-from server import MAX_FRAME, MAX_RESPONSE, Server, error, parse
+from server import Server, error, parse
 
 VERSION = "2026-07-28"
 PREFIX = "io.modelcontextprotocol/"
 
 
 class Handler(BaseHTTPRequestHandler):
-    timeout = 5
+    @property
+    def timeout(self):
+        return self.server.registry.policy.transport.read_seconds
 
     def log_message(self, *args):
         pass  # Requests may contain credentials or private arguments.
@@ -48,7 +50,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(401, error(None, -32000, "AUTHENTICATION_DENIED"))
         sizes = self.headers.get_all("Content-Length", [])
         if (self.headers.get("Transfer-Encoding") is not None or len(sizes) != 1
-                or not re.fullmatch(r"[0-9]{1,7}", sizes[0]) or int(sizes[0]) > MAX_FRAME):
+                or not re.fullmatch(r"[0-9]{1,7}", sizes[0]) or int(sizes[0]) > registry.policy.transport.frame_bytes):
             return self.reply(400, error(None, -32600, "FRAME_LIMIT"))
         if self.headers.get_content_type() != "application/json":
             return self.reply(415, error(None, -32600, "JSON_REQUIRED"))
@@ -90,7 +92,7 @@ class Handler(BaseHTTPRequestHandler):
             result.setdefault("_meta", {})[PREFIX + "serverInfo"] = {"name": "hmt-zero-trust-mcp", "version": "1.1.0"}
             if method.endswith("/list") or method == "server/discover":
                 result.update(cacheScope="private", ttlMs=0)
-        if len(wire(response)) > MAX_RESPONSE:
+        if len(wire(response)) > registry.policy.transport.response_bytes:
             response = error(identifier, -32000, "RESPONSE_LIMIT")
         code = response.get("error", {}).get("code")
         self.reply(404 if code == -32601 else 400 if code in (-32600, -32602) else 200, response)

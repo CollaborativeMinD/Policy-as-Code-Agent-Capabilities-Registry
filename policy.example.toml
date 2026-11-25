@@ -5,6 +5,13 @@ generation = 2
 instructions = "Use retrieved support evidence when available. Keep responses concise and avoid unsupported assumptions."
 baseline_catalog_sha256 = "3bcc9f860f6db8c6a6336cb50b282e369adcf95fabda0f923d5fd8fec2f2d653"
 
+[transport]
+frame_bytes = 1048576
+response_bytes = 262144
+frames_per_process = 10000
+read_seconds = 5
+port = 8000
+
 [environment]
 zone = "local"
 

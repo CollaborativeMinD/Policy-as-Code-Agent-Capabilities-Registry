@@ -18,8 +18,6 @@ from policy_engine import Contract, Denied, Id, PolicyEngine, read_bounded, requ
 
 STATUS_TOOL = "capabilities.status"
 CHANGE_TOOL = "capabilities.transition"
-MAX_FRAME = 1_048_576
-MAX_RESPONSE = 262_144
 PROTOCOL_VERSION = "2025-11-25"
 
 
@@ -91,7 +89,7 @@ class Server:
                 self.registry.record_sovereign(self.session, lease, authority, epoch, schema)
 
             result, settled = self.baseline.call(lease, name, arguments, record_admission)
-            require(len(wire(result)) <= MAX_RESPONSE // 4, "OUTCOME_LIMIT")
+            require(len(wire(result)) <= self.registry.policy.transport.response_bytes // 4, "OUTCOME_LIMIT")
             if settled:
                 result["receipt_sha256"] = self.registry.settle(lease, result, status=result["status"])
             return tool_result(result, result["status"] != "PASS")
@@ -102,7 +100,7 @@ class Server:
         lease = self.registry.admit(self.session, name, arguments, plugin=True)
         try:
             result = binding.invoke(args)
-            require(type(result) is dict and len(wire(result)) <= MAX_RESPONSE // 4, "OUTCOME_LIMIT")
+            require(type(result) is dict and len(wire(result)) <= self.registry.policy.transport.response_bytes // 4, "OUTCOME_LIMIT")
         except Exception:
             raise Denied("CAPABILITY_OUTCOME_UNCERTAIN") from None
         stamp = self.registry.settle(lease, result, status="PASS")
@@ -198,11 +196,12 @@ class Server:
 
 
 def serve(server):
-    for _ in range(10_000):
-        line = sys.stdin.buffer.readline(MAX_FRAME + 1)
+    limits = server.registry.policy.transport
+    for _ in range(limits.frames_per_process):
+        line = sys.stdin.buffer.readline(limits.frame_bytes + 1)
         if not line:
             return 0
-        if len(line) > MAX_FRAME or not line.endswith(b"\n"):
+        if len(line) > limits.frame_bytes or not line.endswith(b"\n"):
             sys.stdout.buffer.write(wire(error(None, -32700, "FRAME_LIMIT")) + b"\n")
             return 3
         try:
@@ -213,7 +212,7 @@ def serve(server):
             response = server.handle(message)
         if response is not None:
             payload = wire(response)
-            if len(payload) > MAX_RESPONSE:
+            if len(payload) > limits.response_bytes:
                 payload = wire(error(response["id"], -32000, "RESPONSE_LIMIT"))
             sys.stdout.buffer.write(payload + b"\n")
             sys.stdout.buffer.flush()
@@ -229,7 +228,7 @@ def main():
     parser.add_argument("--principal")
     parser.add_argument("--credential-file", type=Path)
     parser.add_argument("--baseline-config", type=Path)
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int)
     args = parser.parse_args()
     try:
         policy = PolicyEngine(args.policy, args.policy_sha256)
@@ -241,7 +240,7 @@ def main():
         if args.operation == "serve-http":
             from http_transport import listener
             require(args.principal is None and args.credential_file is None, "HTTP_PER_REQUEST_AUTH_REQUIRED")
-            with listener(registry, args.port, args.baseline_config) as http:
+            with listener(registry, policy.transport.port if args.port is None else args.port, args.baseline_config) as http:
                 http.serve_forever()
             return 0
         require(args.principal is not None and args.credential_file is not None, "SESSION_REQUIRED")

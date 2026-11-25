@@ -69,7 +69,16 @@ class Rule(Contract):
     match: Annotated[dict[str, Scalar], Field(min_length=1, max_length=32)]
 
 
+class Transport(Contract):
+    frame_bytes: Annotated[int, Field(ge=256, le=1048576)]
+    response_bytes: Annotated[int, Field(ge=1024, le=262144)]
+    frames_per_process: Annotated[int, Field(ge=1, le=10000)]
+    read_seconds: Annotated[int, Field(ge=1, le=60)]
+    port: Annotated[int, Field(ge=1, le=65535)]
+
+
 class Declaration(Contract):
+    transport: Transport
     ledger_wait_seconds: Annotated[int, Field(ge=1, le=120)]
     version: Annotated[int, Field(ge=1, le=1)]
     policy_id: Id
@@ -96,11 +105,13 @@ class PolicyEngine:
         require(re.fullmatch(r"[0-9a-f]{64}", expected_sha256) is not None
                 and compare_digest(self.sha256, expected_sha256), "POLICY_PIN_MISMATCH")
         document = tomllib.loads(raw.decode("utf-8"))
-        if "ledger_wait_seconds" not in document:
+        if "ledger_wait_seconds" not in document or "transport" not in document:
             from registry_assets import asset
             defaults = tomllib.loads(asset("policy.example.toml").read_text(encoding="utf8"))
-            document["ledger_wait_seconds"] = defaults["ledger_wait_seconds"]
+            for key in ("ledger_wait_seconds", "transport"):
+                document.setdefault(key, defaults[key])
         self._policy = Declaration.model_validate(document)
+        self.transport = self._policy.transport
         self.ledger_wait_seconds = self._policy.ledger_wait_seconds
         self.generation = self._policy.generation
         self.instructions = self._policy.instructions
