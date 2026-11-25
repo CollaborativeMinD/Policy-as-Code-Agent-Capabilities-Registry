@@ -11,17 +11,17 @@ WORKDIR /src
 COPY . .
 RUN python -m pip install --no-cache-dir -r requirements-build.lock \
     && python -m build --wheel --no-isolation --outdir /dist
-RUN python -m venv /opt/venv \
-    && /opt/venv/bin/python -m pip install --no-cache-dir -r requirements.lock \
-    && /opt/venv/bin/python -m pip install --no-index --no-deps /dist/*.whl
+RUN python -m venv --without-pip /opt/venv \
+    && python -m pip --python /opt/venv/bin/python install --no-cache-dir -r requirements.lock \
+    && python -m pip --python /opt/venv/bin/python install --no-index --no-deps /dist/*.whl
 ARG SOVEREIGN_SHA256
 RUN --mount=type=secret,id=sovereign,target=/tmp/hmt_mcp_plus_server_kernel-1.0.0-py3-none-any.whl \
     if test -n "$SOVEREIGN_SHA256"; then \
       test "$SOVEREIGN_SHA256" = '19f4e7e02c3f1b53aeb99d65bfbf8c076e2b20725fec5488e11313731d04a206' \
       && echo "$SOVEREIGN_SHA256  /tmp/hmt_mcp_plus_server_kernel-1.0.0-py3-none-any.whl" | sha256sum -c - \
-      && /opt/venv/bin/python -m pip install --no-index --no-deps /tmp/hmt_mcp_plus_server_kernel-1.0.0-py3-none-any.whl; \
+      && python -m pip --python /opt/venv/bin/python install --no-index --no-deps /tmp/hmt_mcp_plus_server_kernel-1.0.0-py3-none-any.whl; \
     fi
-RUN /opt/venv/bin/python -m pip check
+RUN python -m pip --python /opt/venv/bin/python check
 
 FROM interpreter AS runtime
 ARG SERVICE_UID
