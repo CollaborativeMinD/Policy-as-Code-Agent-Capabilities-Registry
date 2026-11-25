@@ -1,6 +1,7 @@
 version = 1
 policy_id = "hmt-zero-trust"
-generation = 1
+generation = 2
+instructions = "Use retrieved support evidence when available. Keep responses concise and avoid unsupported assumptions."
 baseline_catalog_sha256 = "3bcc9f860f6db8c6a6336cb50b282e369adcf95fabda0f923d5fd8fec2f2d653"
 
 [environment]
@@ -25,9 +26,18 @@ roles = ["viewer"]
 attributes = { tenant = "analysis", suspended = false }
 
 [roles]
-report_operator = ["reports.preview:list", "reports.preview:invoke"]
-capability_admin = ["reports.preview:status", "reports.preview:enable",
-                    "reports.preview:disable", "reports.preview:remove"]
+report_operator = [
+    "reports.preview:list", "reports.preview:invoke",
+    "kb.search:list", "kb.search:invoke",
+    "kb.catalog:list", "kb.catalog:invoke",
+    "kb.draft:list", "kb.draft:invoke",
+]
+capability_admin = [
+    "reports.preview:status", "reports.preview:enable", "reports.preview:disable", "reports.preview:remove",
+    "kb.search:status", "kb.search:enable", "kb.search:disable", "kb.search:remove",
+    "kb.catalog:status", "kb.catalog:enable", "kb.catalog:disable", "kb.catalog:remove",
+    "kb.draft:status", "kb.draft:enable", "kb.draft:disable", "kb.draft:remove",
+]
 viewer = []
 
 [tools."reports.preview"]
@@ -37,16 +47,45 @@ attributes = { tenant = "analysis" }
 
 [[rules]]
 effect = "allow"
-scopes = ["reports.preview:list", "reports.preview:invoke"]
+scopes = [
+    "reports.preview:list", "reports.preview:invoke",
+    "kb.search:list", "kb.search:invoke",
+    "kb.catalog:list", "kb.catalog:invoke",
+    "kb.draft:list", "kb.draft:invoke",
+]
 match = { "principal.tenant" = "analysis", "resource.tenant" = "analysis", "environment.zone" = "local" }
 
 [[rules]]
 effect = "allow"
-scopes = ["reports.preview:status", "reports.preview:enable", "reports.preview:disable", "reports.preview:remove"]
+scopes = [
+    "reports.preview:status", "reports.preview:enable", "reports.preview:disable", "reports.preview:remove",
+    "kb.search:status", "kb.search:enable", "kb.search:disable", "kb.search:remove",
+    "kb.catalog:status", "kb.catalog:enable", "kb.catalog:disable", "kb.catalog:remove",
+    "kb.draft:status", "kb.draft:enable", "kb.draft:disable", "kb.draft:remove",
+]
 match = { "principal.tenant" = "analysis", "principal.change_control" = true, "environment.zone" = "local" }
 
 [[rules]]
 effect = "deny"
-scopes = ["reports.preview:list", "reports.preview:invoke", "reports.preview:status",
-          "reports.preview:enable", "reports.preview:disable", "reports.preview:remove"]
+scopes = [
+    "reports.preview:list", "reports.preview:invoke", "reports.preview:status", "reports.preview:enable", "reports.preview:disable", "reports.preview:remove",
+    "kb.search:list", "kb.search:invoke", "kb.search:status", "kb.search:enable", "kb.search:disable", "kb.search:remove",
+    "kb.catalog:list", "kb.catalog:invoke", "kb.catalog:status", "kb.catalog:enable", "kb.catalog:disable", "kb.catalog:remove",
+    "kb.draft:list", "kb.draft:invoke", "kb.draft:status", "kb.draft:enable", "kb.draft:disable", "kb.draft:remove",
+]
 match = { "principal.suspended" = true }
+
+[tools."kb.search"]
+plugin = "support-kb"
+contract_sha256 = "ecca26d2468fd556908eafb6149b0affe02595a9a582d5f42f23e6803a2f7104"
+attributes = { tenant = "analysis" }
+
+[tools."kb.catalog"]
+plugin = "support-kb"
+contract_sha256 = "8343a584290848e97e9f5b9886bbbdede259ccb001719071021372486f9538df"
+attributes = { tenant = "analysis" }
+
+[tools."kb.draft"]
+plugin = "support-kb"
+contract_sha256 = "64dac7e0f6f28758d7d88b44de7cafb394dc17ff21a2e53625afe081b22e2918"
+attributes = { tenant = "analysis" }

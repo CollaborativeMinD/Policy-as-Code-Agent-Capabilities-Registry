@@ -55,12 +55,13 @@ def tool_result(value, failed=False):
 
 
 class Server:
-    def __init__(self, registry, session, baseline):
+    def __init__(self, registry, session, baseline, *, stateless=False):
         self.registry = registry
         self.session = session
         self.baseline = baseline
         self.initialized = False
-        self.ready = False
+        self.stateless = stateless
+        self.ready = stateless
 
     def list_tools(self):
         tools = self.registry.visible(self.session)
@@ -146,13 +147,19 @@ class Server:
         return {"jsonrpc": "2.0", "id": identifier, "result": result}
 
     def dispatch(self, method, params):
-        if method == "initialize":
+        caps = {"tools": {}, "resources": {}, "prompts": {}}
+        info = {"name": "hmt-zero-trust-mcp", "version": "1.1.0"}
+        if self.stateless and method == "server/discover":
+            self.registry.check(self.session)
+            return {"supportedVersions": ["2026-07-28"], "capabilities": caps, "serverInfo": info,
+                    "instructions": self.registry.policy.instructions}
+        if method == "initialize" and not self.stateless:
             require(not self.initialized and type(params.get("protocolVersion")) is str, "INITIALIZATION_DENIED")
             self.registry.check(self.session)
             self.initialized = True
             return {"protocolVersion": PROTOCOL_VERSION,
-                    "capabilities": {"tools": {"listChanged": False}},
-                    "serverInfo": {"name": "hmt-zero-trust-mcp", "version": "1.0.0"}}
+                    "capabilities": caps,
+                    "serverInfo": info, "instructions": self.registry.policy.instructions}
         require(self.ready, "NOT_INITIALIZED")
         if method == "ping":
             self.registry.check(self.session)
@@ -160,6 +167,27 @@ class Server:
         if method == "tools/list":
             require(not params.get("cursor"), "INVALID_CURSOR")
             return self.list_tools()
+        if method in {"resources/list", "prompts/list"}:
+            require(set(params) <= {"_meta", "cursor"} and not params.get("cursor"), "INVALID_PARAMS")
+            visible = {tool["name"] for tool in self.registry.visible(self.session)}
+            if method == "resources/list":
+                resource = {"uri": "kb://articles", "name": "Support articles", "mimeType": "application/json"}
+                return {"resources": [resource] if "kb.catalog" in visible else []}
+            prompt = {"name": "draft_support_reply", "arguments": [{"name": "customer_message", "required": True}]}
+            return {"prompts": [prompt] if "kb.draft" in visible else []}
+        if method == "resources/read":
+            require(set(params) <= {"uri", "_meta"} and params.get("uri") == "kb://articles", "UNKNOWN_RESOURCE")
+            effect = self.call("kb.catalog", {})["structuredContent"]
+            return {"contents": [{"uri": "kb://articles", "mimeType": "application/json",
+                                  "text": wire(effect["result"]).decode()}],
+                    "_meta": {"receipt_sha256": effect["receipt_sha256"]}}
+        if method == "prompts/get":
+            require(set(params) <= {"name", "arguments", "_meta"} and params.get("name") == "draft_support_reply",
+                    "UNKNOWN_PROMPT")
+            args = params.get("arguments", {})
+            require(type(args) is dict, "INVALID_PARAMS")
+            effect = self.call("kb.draft", args)["structuredContent"]
+            return {**effect["result"], "_meta": {"receipt_sha256": effect["receipt_sha256"]}}
         if method == "tools/call":
             require(set(params) <= {"name", "arguments", "_meta"}, "INVALID_PARAMS")
             arguments = params.get("arguments", {})
@@ -194,13 +222,14 @@ def serve(server):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("operation", choices=("activate", "serve"))
+    parser.add_argument("operation", choices=("activate", "serve", "serve-http"))
     parser.add_argument("--policy", required=True, type=Path)
     parser.add_argument("--policy-sha256", required=True)
     parser.add_argument("--state", required=True, type=Path)
     parser.add_argument("--principal")
     parser.add_argument("--credential-file", type=Path)
     parser.add_argument("--baseline-config", type=Path)
+    parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
     try:
         policy = PolicyEngine(args.policy, args.policy_sha256)
@@ -208,6 +237,12 @@ def main():
                                       set(frozen_catalog()) | {STATUS_TOOL, CHANGE_TOOL})
         if args.operation == "activate":
             registry.activate()
+            return 0
+        if args.operation == "serve-http":
+            from http_transport import listener
+            require(args.principal is None and args.credential_file is None, "HTTP_PER_REQUEST_AUTH_REQUIRED")
+            with listener(registry, args.port, args.baseline_config) as http:
+                http.serve_forever()
             return 0
         require(args.principal is not None and args.credential_file is not None, "SESSION_REQUIRED")
         session = policy.authenticate(args.principal, read_bounded(args.credential_file, 256).strip())

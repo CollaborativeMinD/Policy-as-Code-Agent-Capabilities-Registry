@@ -125,7 +125,7 @@ class RuntimeTests(TestCase):
         self.enable()
         with self.assertRaisesRegex(Denied, "GENERATION_CONFLICT"):
             self.registry.transition(self.session("admin"), "reports.preview", "disable", 0)
-        newer = self.load(self.raw.replace(b"generation = 1", b"generation = 2"))
+        newer = self.load(self.raw.replace(b"generation = 2", b"generation = 3"))
         replacement = self.registry_for(newer)
         replacement.activate()
         with self.assertRaisesRegex(Denied, "POLICY_STALE"):
@@ -213,7 +213,7 @@ class RuntimeTests(TestCase):
         path.write_bytes(config)
         raw = self.raw.replace(b"[principals.operator]\n",
                                f'[principals.operator]\nbaseline_config_sha256 = "{digest(config)}"\n'.encode())
-        policy = self.load(raw.replace(b"generation = 1", b"generation = 2"))
+        policy = self.load(raw.replace(b"generation = 2", b"generation = 3"))
         registry = self.registry_for(policy)
         registry.activate()
         session = self.session("operator", policy)

@@ -1,6 +1,6 @@
 # Policy-as-Code Agent Capabilities Registry
 
-A local stdio MCP server with a frozen 13-tool HMT baseline and a separate registry for host-installed plug-ins. The baseline uses the supplied kernel’s sovereign authority and tool adapters. Each plug-in tool requires an explicit RBAC grant and a matching ABAC allow. A matching ABAC deny overrides the grant.
+A local stdio and loopback HTTP MCP server with a frozen 13-tool HMT baseline and a separate registry for host-installed plug-ins. The baseline uses the supplied kernel’s sovereign authority and tool adapters. Each plug-in tool requires an explicit RBAC grant and a matching ABAC allow. A matching ABAC deny overrides the grant.
 
 ## Change the system through policy
 
@@ -31,6 +31,20 @@ The last command starts MCP stdio with the `2025-11-25` handshake. Use it as the
 | Viewer | Open an authenticated session with no extra capability grants. |
 
 An admin calls `capabilities.status` with `{"tool":"reports.preview"}` to read the current generation, then calls `capabilities.transition` with `{"tool":"reports.preview","action":"enable","expected_generation":0}`. The operator can then call `reports.preview` with `{"text":"Quarterly report"}`. Use the latest returned generation for `disable` or `remove`. Relist after a change. Every execution rechecks current authorization even when the client has cached a tool name.
+
+## Stateless support KB
+
+Activate the generation-2 example policy. With the same policy path, digest, and state used above, launch the HTTP listener:
+
+```powershell
+python server.py serve-http --policy local-demo/policy.toml --policy-sha256 $policyHash --state local-demo/state.sqlite --port 8000
+```
+
+Connect a local MCP client to `http://127.0.0.1:8000/mcp` with the operator token in its Bearer authorization header. Each POST authenticates independently. The JSON-response endpoint supports the 2026-07-28 request envelope. Discovery returns the pinned policy instructions. The existing stdio launcher retains its handshake.
+
+An admin enables each KB capability separately with `capabilities.transition`. The operator uses `kb.search` for bounded retrieval, reads `kb://articles` through `kb.catalog`, and requests `draft_support_reply` through `kb.draft`. Drafting returns a prompt. Search reads the bundled articles. Catalog reads return only identifiers and titles. A disabled or removed binding blocks a cached request on either transport. Each successful read or draft carries its settlement receipt. Private discovery results expire immediately.
+
+The listener uses local demo credentials, binds only to IPv4 loopback, and serves one request at a time. The Compose profile retains its isolated stdio deployment. An existing installation may keep its own TOML or activate an independently pinned higher generation. Activation fences prior sessions and resets enabled bindings.
 
 ## Policy and lifecycle
 

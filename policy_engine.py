@@ -73,6 +73,7 @@ class Declaration(Contract):
     version: Annotated[int, Field(ge=1, le=1)]
     policy_id: Id
     generation: Annotated[int, Field(ge=1, le=2**63 - 1)]
+    instructions: str = Field(default="", max_length=2048)
     baseline_catalog_sha256: Digest
     environment: Annotated[dict[Id, Scalar], Field(max_length=32)]
     principals: Annotated[dict[Id, Principal], Field(min_length=1, max_length=128)]
@@ -95,6 +96,7 @@ class PolicyEngine:
                 and compare_digest(self.sha256, expected_sha256), "POLICY_PIN_MISMATCH")
         self._policy = Declaration.model_validate(tomllib.loads(raw.decode("utf-8")))
         self.generation = self._policy.generation
+        self.instructions = self._policy.instructions
         self.policy_id = self._policy.policy_id
         require(self._policy.baseline_catalog_sha256 == BASELINE_SHA256, "BASELINE_PIN_MISMATCH")
         self._validate_references()
@@ -115,6 +117,13 @@ class PolicyEngine:
             for key in rule.match:
                 namespace, _, attribute = key.partition(".")
                 require(attribute in attributes.get(namespace, ()), "UNKNOWN_ABAC_ATTRIBUTE")
+
+    def authenticate_bearer(self, token: bytes):
+        fingerprint = digest(token)
+        for name, principal in self._policy.principals.items():
+            if compare_digest(principal.credential_sha256, fingerprint):
+                return self.authenticate(name, token)
+        raise Denied("AUTHENTICATION_DENIED")
 
     def authenticate(self, principal_id: str, token: bytes) -> Session:
         require(32 <= len(token) <= 256, "AUTHENTICATION_DENIED")

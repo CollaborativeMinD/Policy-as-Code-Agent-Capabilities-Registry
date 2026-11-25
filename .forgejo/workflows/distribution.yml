@@ -42,6 +42,7 @@ jobs:
           . .venv/bin/activate
           python -m pip install -r requirements.lock -r requirements-build.lock
           python -m pip check
+          python -B -W error -m unittest -v
           python deploy_common.py package --output local-proof
       - name: Publish Linux distribution evidence
         uses: https://data.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "policy-as-code-agent-capabilities-registry"
-version = "1.0.1"
+version = "1.1.0"
 description = "TOML-governed MCP server with a sovereign baseline and capability registry"
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
@@ -17,7 +17,7 @@ hmt-capability-bootstrap = "bootstrap_demo:main"
 
 [tool.setuptools]
 py-modules = ["baseline_bridge", "bootstrap_demo", "capability_registry", "plugins", "policy_engine",
-              "registry_assets", "server"]
+              "registry_assets", "server", "http_transport"]
 
 [tool.setuptools.data-files]
 "share/hmt-capabilities" = ["baseline_catalog.json", "policy.example.toml"]
