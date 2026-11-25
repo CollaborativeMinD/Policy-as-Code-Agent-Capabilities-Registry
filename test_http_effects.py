@@ -16,6 +16,23 @@ class HttpEffects(TestCase):
     load = test_server.RuntimeTests.load
     registry_for = test_server.RuntimeTests.registry_for
 
+    def test_pinned_frame_limit_reaches_http(self):
+        candidate = self.raw.replace(b"frame_bytes = 1048576", b"frame_bytes = 512")
+        self.assertNotEqual(candidate, self.raw)
+        policy = self.load(candidate)
+        with listener(self.registry_for(policy), 0) as http:
+            thread = Thread(target=http.handle_request, daemon=True)
+            thread.start()
+            with closing(HTTPConnection("127.0.0.1", http.server_port, timeout=5)) as conn:
+                headers = {"Authorization": "Bearer " + self.tokens["viewer"].decode(),
+                           "Content-Type": "application/json"}
+                conn.request("POST", "/mcp", b"x" * 513, headers)
+                response = conn.getresponse()
+                self.assertEqual(response.status, 400)
+                self.assertEqual(json.loads(response.read())["error"]["message"], "FRAME_LIMIT")
+            thread.join(timeout=5)
+            self.assertFalse(thread.is_alive())
+
     def test_kb_lifecycle_and_transport(self):
         http = listener(self.registry, 0)
         thread = Thread(target=http.serve_forever, daemon=True)
